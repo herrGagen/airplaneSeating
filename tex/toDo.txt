@@ -1,0 +1,14 @@
+3) In section 3.2.2 there is a missing diagram to explain the workings of the dynamic program.
+
+5) There is neither a discussion section nor a references page.
+
+6) Correctness of the singleton / couple sweep has not been established.
+==================================================
+
+Other than fixing those, I have confidence that the following can be added to the paper by January 14th
+
+A) Two dimensional seating arrangements can be treated as one dimensional if we assign each seat to be either a singleton or a couple seat before running the sweep.  Such an assignment algorithm is emerging from the murkiness of my brain at the moment.
+
+B) We can optimally solve families of size 3 using a slight variant of the sweep swap algorithm. 
+
+C) Because each exchange makes 0-2 people happy, it should be rather easy to come up with a simple 2 approximation, at least on the line.
