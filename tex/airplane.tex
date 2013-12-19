@@ -460,13 +460,40 @@ If we declare the block unaligned in the second or third cases, and preform $N$ 
 
 The final case would become $E B_1 E B_2 E \hdots B_k E$.  This would reduce the number of odd parity gaps by 2 and cost $\sum_{i=1}^k |B_i|$ swaps.  Please note that only shifts between adjacent odd parity gaps decrease the number of odd parity gaps that we have, that all such shifts decrease our number of odd parity gaps by 2 and that they all cost a number of swaps equal to the number of couples in the blocks between them all.
 
+\begin{lem} \label{lem:shiftLeftRightIdentical}
+Shifting a block surrounded by odd gaps either to the right or left makes both of its odd parity gap neighbors even, and are equivalent in terms of total swaps left to pair all couples.
+\end{lem}
+
+\begin{proof}
+The gap reduction part was argued above, so we need only prove equivalence.  A block bordered by two odd gaps has two neighbor passengers, $x$ and $y$.  After moving the block one to the left, we will shift passenger $x$ to the right side of the block, immediately before passenger $y$.  If $x$ and $y$ match, they increase the size of the block, if they don't, we know that $y$ didn't match its right neighbor otherwise it would have been a part of a block rather than an odd gap.
+
+If we move the block to the right, then passenger $y$ winds up one unit to the left of the block next to $x$ again. Since we know that $x$ wasn't partnered with its neighbor to the left, the only new passible partnership is, as before, $x$ and $y$.
+
+Thus moving a block left or right are equivalent in terms of number of swaps left to complete all pairings.
+\end{proof}
+
 \subsubsection{Dynamic Program for Gap Assignment}
 
-A simple dynamic program can answer the question: which blocks do we declare unaligned in the optimal seating structure?  If the block between odd gap $i$ and $i+1$ has $N_i$ paired couples, then we label the number of required swaps to fix parity is $S(x,k)$ where $x$ is the index of the odd parity gap we're considering and $k$ is the number of odd parity gaps we've closed.
+A simple dynamic program can answer the question: which blocks do we declare unaligned in the optimal seating structure?  
 
 Diagramatically, we have:
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1]
+\draw (-0.3,0) node{$\hdots$};
+\foreach \x in {0, 1, 2, 3, 4}
+{
+  \draw (0.5+2*\x,0) +(-.4,-.3) rectangle ++(.4,.3);
+  \draw (0.5+2*\x,0) node{$E_\x$};
+  \draw (2*\x+1.8,.3) +(-.3,-.3) circle (.4);
+  \draw (2*\x+1.5,0) node{$O_\x$};
+}
+\draw (10.3,0) node{$\hdots$};
+\end{tikzpicture}
+\end{figure}
 
+If $E_i$, the block between odd gap $i$ and $i+1$ has $N_i$ paired couples, and we label the number of required swaps to fix parity $S(x,k)$ where $x$ is the index of the block we're moving and $k$ is the number of odd parity gaps we've closed.
 
 Our recurrence relation is: 
 
