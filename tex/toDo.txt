@@ -1,4 +1,3 @@
-3) In section 3.2.2 there is a missing diagram to explain the workings of the dynamic program.
 
 5) There is neither a discussion section nor a references page.
 
