@@ -518,33 +518,8 @@ With the block structure in hand from the first step of our algorithm, we can fi
     $i \leftarrow i + 2$\;
   }
   \uElseIf{ $x_i$ is part of a couple}{
-    \uIf{ $x_{i+1}$ and $x_{i+2}$ aren't an already assigned pair}{
       Place $x_i$'s partner in $x_{i+1}$\;
       $i \leftarrow i + 2 $\;
-    }    
-    \Else( \tcp*[h]{Try to trade $x_i$ for a singleton} ) {     
-      \uIf{ $x_i$'s partner is next to a singleton} {
-        %%  This is wrong %%
-        \uIf{ Left singleton $s_L$ is an even number of units from the end of the previous block,} {
-          Exchange $x_i$ for $s_L$\;
-          $numS \leftarrow numS-1$\;
-        }
-        \uElseIf{ Right singleton $s_R$ is an even number of units from the end of the next block} {
-          Exchange $x_i$ for $s_R$\;
-          $numS \leftarrow numS - 1$\;
-        }      
-        \Else{
-          Exchange $x_i$ for the first singleton to its right.
-          $numS \leftarrow numS - 1$\;
-        } %even parity exchange possible 
-      }
-      \Else { %partner not next to a singleton
-        Exchange $x_i$ for the first singleton to its right.\;
-        $numS \leftarrow numS - 1$\;
-      } %partner not next to a singleton
-      \tcp*[h]{$numS$ unchanged: we already budgeted for this}
-      $i \leftarrow i + 3$\;
-    } % if next 2 are a couple
   }
   \Else( \tcp*[h]{$x_i$ is a singleton} ) {
     \uIf{ $x_{i+1}$ is half of a couple} {
