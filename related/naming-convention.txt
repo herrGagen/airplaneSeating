@@ -4,4 +4,5 @@ Then first two letters of next two authors, with first letter capitalized.
 Then last two numbers of year. 
 (Optional: a hyphen and then the venue.)
 
-We should use the same naming convention with the bibfiles, expect with hyphen plus venue.
+We should use the same naming convention with the bibfiles, expect with hyphen
+plus venue.

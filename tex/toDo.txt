@@ -1,4 +1,3 @@
-
 5) There is neither a discussion section nor a references page.
 
 6) Correctness of the singleton / couple sweep has not been established.
