@@ -225,7 +225,11 @@ First, because the plane is full of couples, each pair of aligned adjacent seats
 
 Second, any sweep algorithm will start with the leftmost aligned pair of seats containing a mismatched couple and swap one of those two inhabitants with another passenger in the plane.  Once we prove below that all exchange choices leave the plane in a state that requires the same number of swaps, we can claim that our sweep algorithm is trivial.
 
-\begin{proof}{All exchanges that make one couple happy are equivalent.}
+\begin{lem} \label{lem:identicalToRelabel}
+All exchanges that make one couple happy are equivalent up to a relabeling.
+\end{lem}
+
+\begin{proof}
 If the first two passengers are parts of the $A$ and $B$ couple, their partners are in one of two configurations (where we only show seats occupied by one member of the $A$ or $B$ couple):
 \begin{figure}[H]
 \centering
@@ -283,7 +287,7 @@ If we instead swapped $B$, we'd get two configurations also:
 \end{tikzpicture}
 \end{figure}
 
-These cases are, exactly like the $A$ swapping cases, equivalent in terms of how many swaps would be required to finish pairing the rest of the plane.  The seconed possible initial case (where $A$ and $B$ are both seated next to family $C$, yields similarly equivalent situations after an exchange for $A$:
+These cases are, exactly like the $A$ swapping cases, equivalent in terms of how many swaps would be required to finish pairing the rest of the plane.  The second possible initial case (where $A$ and $B$ are both seated next to family $C$, yields similarly equivalent situations after an exchange for $A$:
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=1]
@@ -330,7 +334,6 @@ Since all sweep algorithms that make at least one couple happy with every exchan
 \subsection{Mixed families -- couples and singletons}
 
 Let us now consider the case where we have a mixture of couples and singletons, where we want to seat all the couples together. We assume that singletons are always happy, irrespective of whom they sit next to.
-
 
 \subsubsection{Phase One, determining structure:} 
 
@@ -409,7 +412,6 @@ To properly assign a structure to a seating arangement for singletons and couple
 \draw (2.7,1) node{$s_2$};
 \end{tikzpicture}
 \end{figure}
-
 
 To fully represent a starting seating arrangement, we must note which passengers are not in blocks, contigious seats thus occupied will be called gaps.  While al blocks will be of even length (because they're comprised of couples), gaps can be of even or odd length.  I will refer to the parity of a gap as odd or even depending on whether the number of elements in it are odd or even.
 
@@ -503,69 +505,95 @@ Our recurrence relation is:
 
 Memoizing this table takes the number of odd gaps times the number of gaps we have to close.  Since each gap has to end with a block, the number of odd gaps is no more than $\frac13$ of our total number of seats.  Since we can't close more gaps than we have, this simple algorithm is, at worst, quadratic in number of passengers.  
 
-\subsubsection{Phase Two: Performing the Swap Sweep}
+\subsubsection{Performing the Swap Sweep}
 
-With the block structure in hand from the first step of our algorithm, we can finally get down to the business of counting passenger swaps. 
+After the dynamic program is run, we perform the swaps it indicated.  This leaves us with a set of subproblems, the gaps between blocks (who will not move again).  Even gaps are easier to solve than odd gaps because their parity is already set, so we'll start with them.  While sweeping through a gap, we look at two elements at a time, seats $i$ and $i+1$.  With $s$ representing singletons, and all capital letters representing couple members, there are five distinct cases, each of which get treated differently.
 
-\begin{algorithm}
-  \caption{ \texttt{SwapScan} }
-  \label{alg:swapScan}
-  Number of singletons $numS$
-  Number of odd parity gaps $numP$
-  Sweep left to right over position $x_i$
+\begin{itemize}
+\item $AA$ 
+Though it would seem that this shouldn't happen as gaps are filled with unpaired passengers, earlier steps in our sweep algorithm can leave these completed pairings in place.  When enountered, leave them there.
+\item $AB$ 
+The same arguments from Lemma \ref{lem:identicalToRelabel} hold here and swapping either $A$ or $B$ with its pair elsewhere in the plane leaves the passenger arrangement identical up to a relabeling.  When encountered, swap $B$ for the partner of $A$.
+\item $As$
+The same arguments from Lemma \ref{lem:identicalToRelabel} hold here with some slight modification. The relabeling would be calling 2 specific singletons $A$.  Since singletons have the potential to be left in place (saving swaps) swapping in the partner to $A$ will always be the optimal answer.  When encountered, exchange $s$ for the partner for $A$.
+\item $sA$ 
+This case is more complicated, as we can leave the singleton in place if we have 2 more singletons than we have odd parity gaps, and we have a complementary $Bs$ in this same gap.  When encountered, if we have 2 extra singletons in the budget, scan from right of this gap. If there is a matching $Bs$, leave both singletons in place and turn this gap into 2 new gaps: the one between these 2 singletons, and the gap between the right singleton and the next block.  Else, swap the $s$ for the matching $A$.
+\item $ss$ 
+Leave in place permanently if we have 2 more free singletons than odd parity gaps, temporarially if we are going to have to use these singletons.
+\end{itemize}
 
-  \uIf(\tcp*[h]{Leave them together}){ $x_i$ and $x_{i+1}$ are a pair}{    
-    $i \leftarrow i + 2$\;
-  }
-  \uElseIf{ $x_i$ is part of a couple}{
-      Place $x_i$'s partner in $x_{i+1}$\;
-      $i \leftarrow i + 2 $\;
-  }
-  \Else( \tcp*[h]{$x_i$ is a singleton} ) {
-    \uIf{ $x_{i+1}$ is half of a couple} {
-      Place $x_{i+1}$'s partner in $x_i$\;
-      $i \leftarrow i + 2$\;
-    }
-    \Else (\tcp*[h]{Enforce conservation of singletons} ) {      
-      \uIf{$x_{i+1}$ is a singleton}{
-            \uIf(\tcp*[h]{Leave these two singletons in their seats}){ $numS >= 2$}{              
-              $numS \leftarrow numS - 2$\; 
-              $i \leftarrow i + 2$\; 
-            }
-            \Else(\tcp*[h]{We have to swap them both out}){
-              trade $x_i$ for the last unpaired couple in the plane\;
-              trade $x_{i+1}$ for $x_i$'s partner\;
-              $i \leftarrow i + 2$\;
-            }
-          }
-          \Else{
-            \uIf(\tcp*[h]{Leave one singleton in its seat}){$numS \geq 1$}{    
-              $numS \leftarrow numS - 1 $\;
-              $i \leftarrow i + 1 $\;
-            }
-            \Else{
-              trade $x_i$ for the last unpaired couple in the plane\;
-              $i \leftarrow i + 1$\;          
-            }
-          }
-    }
-  } % $x_i$ was a singleton
+By Lemma \ref{lem:identicalToRelabel}, and the observation that when an swap is identical up to a relabel, if the singletons are moved to an incomplete portion of the plane, they can never require more swaps than if we instead moved halves of couples.
 
-\end{algorithm}
+\begin{lem} \label{lem:splitOddGaps}
+Permanently leaving a singleton at an odd position in an odd length gap partitions it into 2 even length gaps that can be scanned using the above rules.
+\end{lem}
 
-\FloatBarrier
-\section{Interesting Questions}
+Following this order, we have 2 types of odd length gaps left: those with singletons in even numbered seats (counting from their first seat) and those with no singletons.  Each of these gaps needs 1 singleton in an odd numbered seat to apply Lemma \ref{lem:splitOddGaps} and then scan using the even gap rules.  To scan odd gaps with singletons in them, we add in one rule:
 
-\begin{enumerate}
-\item Problem with families of size 3? Families of mixed sizes?
-\item Suppose we want to preserve certain seats qualities (aisle, window, etc)?
-\item What if some type of seats people are averse to sit next to? For example, seats near crying babies or near toilets.
-\item How do we minimize the maximum amount of movement for any one person?
-\item How about two dimensional planes?
-\item Aisle and window preference considerations?
-\item Minimize total distance traveled?
-\item Allow simultaneous swaps if no people in motion cross paths (other than those that are exchanging seats).  This is more fun if we have more than one aisle to walk down.
-\end{enumerate}
+\begin{itemize}
+\item{$As$}
+To save a single exchange, if the other $A$ is in an odd seat, exchange the $s$ for that $A$ and then use even scan rules on the 2 even gaps just created.  If the other $A$ is in an even seat, exchange this pair from $As$ to $sA$ and continue this gap as if it were even.
+\end{itemize}
+
+With only odd length gaps remaining that have no singletons in them, we need to swap in singletons that were left in their original seats using the $ss$ rule.  While scnaning these gaps, we use the simple rules:
+
+\begin{itemize}
+\item{$A_1 B$}
+If $A_2$ is also in an odd seat, trade both $A_1$ and $A_2$ for a pair of singletons sitting next to each other in a completed gap. Then complete the 3 newly created even gaps using the even gap rules.
+\item{$A_1-$}
+When we reach the end of a gap without encountering the previous situation, trade both $A_1$ and $A_2$ for a pair of singletons sitting next to each other in a completed gap. Then scan the gap that previously contained $A_2$.
+\end{itemize}
+
+\subsubsection{Win-Win Exchanges, Completed Couples and N-Chains}
+
+We make a quick note here on win-win exchanges.  A win-win exchange is of the form:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1]
+\draw (0,0.0) +(-.5,-.25) rectangle ++(.5,.25);
+\draw (0,0.0) node{$A B$};x
+\draw (2.0,0) +(-.5,-.25) rectangle ++(.5,.25);
+\draw (2.0,0) node{$B A$};
+\end{tikzpicture}
+\end{figure}
+
+We have two pairs of seats that can be satisfied completely with a single exchange. Since we cannot possibly make more than 2 couples happy with a single exchange, the optimal solution will contain as many of these as possible.  
+
+\begin{lem} 
+If a either of the seated couples in win-win exchanges are misaligned, it requires 2 swaps to make both pairs happy.
+\end{lem}
+
+\begin{proof}
+Without loss of generality, we call the first, unaligned pair $A_1B_1$ and the second $A_2B_2$.  Since the first pair is unaligned, any exchange to pair it or its seatmate will necessarially not include $B_1$.  
+\end{proof}
+
+\begin{cor} \label{cor:winWinAsBlocks}
+If a consecutive block of $N$ win-win pairs is misaligned, it requires $N$ more exchanges to satisfy all pairings than if they were all aligned.
+\end{cor}
+
+Win-win exchanges are 2 couples that can both be paired with a single exchange.  We would like to generalize this, calling win-win exchanges a two chain.  Three chains are three pairs that can all be satisfied with 2 exchanges like the example below:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1]
+\draw (0,0.0) +(-.5,-.25) rectangle ++(.5,.25);
+\draw (0,0.0) node{$A B$};x
+\draw (2.0,0) +(-.5,-.25) rectangle ++(.5,.25);
+\draw (2.0,0) node{$B C$};
+\draw (4.0,0) +(-.5,-.25) rectangle ++(.5,.25);
+\draw (4.0,0) node{$A C$};
+\end{tikzpicture}
+\end{figure}
+
+This generalizes to $N$ chains, where chains are characterized by $N$ pairs that can all be satisfied with exactly $N-1$ swaps.
+
+\subsubsection{Optimality of Sweep Algorithm}
+
+Our sweep algorithm ensures that we leave in place as many completed couples as possible. We do this because each completed couple we leave in place requires zero swaps, while setting them to be unaligned introduces new exchanges into our solution.  The ratio of unaligned exchanges to aligned exchanges is thus infinite, something to be avoided if we want a to bound the badness of a solution.
+
+In its current incarnation, our algorithm ignores all $N$-chains.  Since each $N$-chain requires $N-1$ swaps already, failing to optimally align our couple seats will cost us at most $\frac{N}{N-1}$ times the optimal number of exchanges.  That is, our current algorithm is a 2 approximation.4
+
 
 \newpage
 \section{References}
@@ -573,3 +601,4 @@ With the block structure in hand from the first step of our algorithm, we can fi
 Algorithm reading group notes scribed by S Munson, September 2012.
 
 \end{document}
++
