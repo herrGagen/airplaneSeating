@@ -33,6 +33,10 @@ We give a hardness proof for the general case of unbounded, heterogeneous family
 \section{Introduction}
 Though passengers on an airplane book their seats as families, we imagine that during boarding many of these families wound up scattered throughout the plane rather than next to each other.  Since the only way to fix this situation without reboarding is single passenger exchanges (swaps), we would like to find the smallest number of swaps necessary so that all families are happily seated together.
 
+This problem is very similar to $k$-way partitioning \ref{optDutchFlag}, \ref{mcIlroy93}, which is a generalization of the Dutch Flag problem posed by Djikstra \ref{mcMaster78}.  Our problems differ only because the $k$-way partitioning elements have a definite ordering.
+
+Another closely related problem is found in kidney exchanges and other market clearinghouses.    
+
 \subsection{Airplane as a Line Simplification}
 
 Instead of using actual airplane seating charts, we first consider the one dimensional case, where we think of the airplane seats to be arranged in a line, as shown below in figure \ref{fig:lineplane}.  All seats labeled ``A'' are initially populated with a member of the A family, ``B'' the B family, and ``C'' the C family.  You'll note from the figure that we don't care about the ordering within a family (i.e. Dad in seat 1 and Mom in seat 2 is exactly as optimal as Mom in seat 1 and Dad in seat 2). 
@@ -331,11 +335,11 @@ In all cases, exchanging either $A$ or $B$ first left us with conifgurations tha
 
 Since all sweep algorithms that make at least one couple happy with every exchange are equivalent, and there exists an optimal sweep algorithm that does exactly that, we have proven that our sweep alorithm finds the lowest number of required exchanges.
 
-\subsection{Mixed families -- couples and singletons}
+\section{Mixed families -- couples and singletons}
 
 Let us now consider the case where we have a mixture of couples and singletons, where we want to seat all the couples together. We assume that singletons are always happy, irrespective of whom they sit next to.
 
-\subsubsection{Phase One, determining structure:} 
+\subsection{Phase One, determining structure:} 
 
 We first observe that the worst case scenario for performing exchanges is when we have a situation like:
 
@@ -474,7 +478,7 @@ If we move the block to the right, then passenger $y$ winds up one unit to the l
 Thus moving a block left or right are equivalent in terms of number of swaps left to complete all pairings.
 \end{proof}
 
-\subsubsection{Dynamic Program for Gap Assignment}
+\subsection{Dynamic Program for Gap Assignment}
 
 A simple dynamic program can answer the question: which blocks do we declare unaligned in the optimal seating structure?  
 
@@ -505,7 +509,7 @@ Our recurrence relation is:
 
 Memoizing this table takes the number of odd gaps times the number of gaps we have to close.  Since each gap has to end with a block, the number of odd gaps is no more than $\frac13$ of our total number of seats.  Since we can't close more gaps than we have, this simple algorithm is, at worst, quadratic in number of passengers.  
 
-\subsubsection{Performing the Swap Sweep}
+\subsection{Performing the Swap Sweep}
 
 After the dynamic program is run, we perform the swaps it indicated.  This leaves us with a set of subproblems, the gaps between blocks (who will not move again).  Even gaps are easier to solve than odd gaps because their parity is already set, so we'll start with them.  While sweeping through a gap, we look at two elements at a time, seats $i$ and $i+1$.  With $s$ representing singletons, and all capital letters representing couple members, there are five distinct cases, each of which get treated differently.
 
@@ -544,9 +548,21 @@ If $A_2$ is also in an odd seat, trade both $A_1$ and $A_2$ for a pair of single
 When we reach the end of a gap without encountering the previous situation, trade both $A_1$ and $A_2$ for a pair of singletons sitting next to each other in a completed gap. Then scan the gap that previously contained $A_2$.
 \end{itemize}
 
-\subsubsection{Win-Win Exchanges, Completed Couples and N-Chains}
+\subsection{Computer Simulations and Results}
 
-We make a quick note here on win-win exchanges.  A win-win exchange is of the form:
+In order to verify our hunch that the above algorithm was optimal, we coded up our algorithm in C++ and ran it on a PC. Each passenger was represented by a data structure: all passengers have a family name, a chair number, and know the family name of their left and right neighbors and the location of their partner.  Indices of seats occupied by singletons were stored in a single sorted array to allow range queries of singletons to occur in logarithmic time.
+
+We sought to uncover the worst cases ecountered by our algorithm and devised the following simple test: starting from a completely content plane, we would select and exchange $k$ random passengers.  Because the optimal number of exchanges to return the plane to a completely content state must be no greater than $k$, we could compare the number of exchanges our algorithm found to $k$ in order to find the worst case performance ratio.  Any performance ratio less than 1 was discarded since this meant that the initial shuffling was simple enough that it could be undone in less than $k$ exchanges.
+
+In order to find the high performance ratios, we allowed a genetic algorithm to search the space of shiffled seating arrangements.  For a plane of size $N$ with fixed $N_s \leq N$ singletons, the GA's genes first $N_s$ alleles were the indices of the singletons.  The next $2k$ indices were each interpreted as a pair of passenger positions to swap.  
+
+The initial conifguration routine first sorted the list of singletons, then handled duplicate entries and having an odd number of seats between consecutive singletons. The vacant seats were occupied by content couples.  Finally the swapping portion of the genes were applied and passenger data structures were kept up to date with each swap.
+
+It became almost immediately apparent that our algorithm was not optimal, as even modest sized problems ($N = 100, k = 10$) had worst case performance ratios above 1.6 after a few hundred generations.
+
+\subsection{Win-Win Exchanges, Completed Couples and N-Chains}
+
+Analysis of the genetic algorithm's worst case returns pointed us towards the following conclusion: we weren't handling win-win exchanges properly.  A win-win exchange is of the form:
 
 \begin{figure}[H]
 \centering
@@ -588,11 +604,11 @@ Win-win exchanges are 2 couples that can both be paired with a single exchange. 
 
 This generalizes to $N$ chains, where chains are characterized by $N$ pairs that can all be satisfied with exactly $N-1$ swaps.
 
-\subsubsection{Optimality of Sweep Algorithm}
+\subsection{Optimality of Sweep Algorithm}
 
 Our sweep algorithm ensures that we leave in place as many completed couples as possible. We do this because each completed couple we leave in place requires zero swaps, while setting them to be unaligned introduces new exchanges into our solution.  The ratio of unaligned exchanges to aligned exchanges is thus infinite, something to be avoided if we want a to bound the badness of a solution.
 
-In its current incarnation, our algorithm ignores all $N$-chains.  Since each $N$-chain requires $N-1$ swaps already, failing to optimally align our couple seats will cost us at most $\frac{N}{N-1}$ times the optimal number of exchanges.  That is, our current algorithm is a 2 approximation.4
+In its current incarnation, our algorithm ignores all $N$-chains.  Since each $N$-chain optimally requires $N-1$ swaps, failing to optimally align our couple seats will cost us at most $\frac{N}{N-1}$ times the optimal number of exchanges.  That is, our current algorithm is a 2 approximation.
 
 
 \newpage
