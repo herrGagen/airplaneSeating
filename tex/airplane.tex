@@ -33,9 +33,11 @@ We give a hardness proof for the general case of unbounded, heterogeneous family
 \section{Introduction}
 Though passengers on an airplane book their seats as families, we imagine that during boarding many of these families wound up scattered throughout the plane rather than next to each other.  Since the only way to fix this situation without reboarding is single passenger exchanges (swaps), we would like to find the smallest number of swaps necessary so that all families are happily seated together.
 
-This problem is very similar to $k$-way partitioning \ref{optDutchFlag}, \ref{mcIlroy93}, which is a generalization of the Dutch Flag problem posed by Djikstra \ref{mcMaster78}.  Our problems differ only because the $k$-way partitioning elements have a definite ordering.
+Ths problem is closely related to the Dutch Flag problem posed by Djikstra \ref{djikstraBook}, where a number of colored marbles need to be rearranged from a random order to a final, known configuration.  The correct solutions posed by Djikstra and Meyer were analyzed and found non-optimal by McMaster \ref{mcMaster78}.  A generalization to any number of colors was proposed and solved optimally \ref{optDutchFlag} using a scanning algorithm with insights that helped us form ours.  This generalization was later named the American Flag problem and shown to have applications for speeding up Radix sorting \ref{mcIlroy93}.
 
-Another closely related problem is found in kidney exchanges and other market clearinghouses.    
+Another related problem is found in kidney exchanges and other market clearinghouses where a number of patient-donor pairs that aren't compatible require trades with other patient-donor pairs for compatible organs.  Market clearinghouses work like our 1D airplanes with large families that only need to seat together in pairs.  The problem is solved by finding a cycle cover of a graph, which was proven NP complete \ref{abrahamBlumSandholm07}.  Its impact on saving lives was both simulated \ref{kidney-roth04} and implemented \ref{abrahamBlumSandholm07}.  it was also proven that at allowing only 4 pairs of in any exchange chain is sufficient to guarantee an optimal cycle cover \ref{Roth_Kidney3way}.
+
+Cycle covers of graphs also find an application in genetics.  This NP complete family of problems \ref{sankoffBlanchette97}, \ref{caprara97}, \ref{yu07} seeks the series of changes in DNA that lead from the DNA sequence of a common ancestor to two (or more) descendents.  Because the mutations and exchanges in DNA over time are functionally identical to swapping passengers, we can reformulate this as a constained seating rearrangement with known starting and ending poisitions.
 
 \subsection{Airplane as a Line Simplification}
 
@@ -218,7 +220,7 @@ Proving theorem \ref{thm:sweepCorrectness} is now trivial.
 \begin{proof}
 If we are given an optimal set of exchanges that are in non-decreasing order of leftmost passenger, we can transform it into a set of exchanges using the same number of swaps that is in non-decreasing order by combining a bubble sort and lemma \ref{lem:swapRules}.
 
-First, we insist that all exchanges be listed with their lowest index first.  THen we nte that in all swaps where an exchange is modified by the rules of lemma \ref{lem:swapRules}, even after making the modifications, the modified exchange will never have a first index smaller than that of the exchange that we just swapped it for.
+First, we insist that all exchanges be listed with their lowest index first.  Ten we note that in all swaps where an exchange is modified by the rules of lemma \ref{lem:swapRules}, even after making the modifications, the modified exchange will never have a first index smaller than that of the exchange that we just swapped it for.
 
 Finally, starting at exchanges $n-1$ and $n$, we swap the exchanges if the first index of exchange $n$ is lower than that of the exchange $n-1$, and then move on to comparing exchanges $n-1$ and $n-2$.  After one pass, the exchange with lowest left passenger would be our first element. After $n$ passes, the list will be sorted.
 \end{proof}
