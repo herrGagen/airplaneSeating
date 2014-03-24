@@ -27,18 +27,19 @@
 \maketitle
 
 \begin{abstract}
-While on an airplane, passengers are often asked to swap seats with another passenger so that a couple or a family can sit together.  This paper focuses on minimizing the number of passenger exchanges to make all families on a plane happy.
-We give a hardness proof for the general case of unbounded, heterogeneous family sizes and optimal algorithms for smaller families on idealized planes and more realistic seating arrangements.
+We imagine passengers on an airplane being asked to swap seats so that a couple or family can sit together.  This paper focuses on minimizing the number of passenger exchanges to make all families on a plane happy.  We give a hardness proof for the general case of unbounded, heterogeneous family sizes and constant factor approximation heuristics for smaller families on idealized planes.
 \end{abstract}
 
 \section{Introduction}
-Though passengers on an airplane book their seats as families, we imagine that during boarding many of these families wound up scattered throughout the plane rather than next to each other.  Since the only way to fix this situation without reboarding is single passenger exchanges (swaps), we would like to find the smallest number of swaps necessary so that all families are happily seated together.
+Though passengers on an airplane book their seats as families, we imagine that during boarding many of these families wind up scattered throughout the plane rather than next to each other.  Since the only way to fix this situation without reboarding is single passenger exchanges (swaps), we would like to find the smallest number of swaps necessary so that all families are happily seated together.
 
-Ths problem is closely related to the Dutch Flag problem posed by Djikstra \cite{djikstraBook}, where a number of colored marbles need to be rearranged from a random order to a final, known configuration.  The correct solutions posed by Djikstra and Meyer were analyzed and found non-optimal by McMaster \cite{mcMaster1978analysis}.  A generalization to any number of colors was proposed and solved optimally \cite{bitner1982asymptotically} using a scanning algorithm with insights that helped us form ours.  This generalization was later named the American Flag problem and shown to have applications for speeding up Radix sorting \cite{mcllroy1993engineering}, \cite{al2005formulation}.
+\subsection{Prior and Related Work}
 
-Another related problem is found in kidney exchanges and other market clearinghouses where a number of patient-donor pairs that aren't compatible require trades with other patient-donor pairs for compatible organs.  Market clearinghouses work like our 1D airplanes with large families that only need to seat together in pairs.  The problem is solved by finding a cycle cover of a graph, which was proven NP complete \cite{abraham2007clearing}.  Its impact on saving lives was both simulated \cite{roth2004kidney} and implemented \cite{abraham2007clearing}.  It was also proven that at allowing only 4 pairs of in any exchange chain is sufficient to guarantee an optimal cycle cover \cite{roth2007efficient}.
+Ths problem is closely related to the Dutch Flag problem posed by Djikstra \cite{dijkstra1976discipline}, where a number of colored marbles need to be rearranged from a random order to a final, known configuration.  The correct solutions posed by Djikstra and Meyer were analyzed and found non-optimal by McMaster \cite{mcMaster1978analysis}.  A generalization to any number of colors was proposed and solved optimally \cite{bitner1982asymptotically} using a scanning algorithm with insights that helped us form ours.  This generalization was later named the American Flag problem and shown to have applications for speeding up Radix sorting \cite{mcllroy1993engineering}, \cite{al2005formulation}.
 
-Cycle covers of graphs also find an application in genetics.  This NP complete family of problems \cite{bryant1998compleity}, \cite{durrett2005genomic}, \cite{goldberg2001complexity}, \cite{caprara1999formulations}, \cite{sankoff1997median}, \cite{popov2007multiple} seeks the series of changes in DNA that lead from the DNA sequence of a common ancestor to two (or more) descendents.  Because the mutations and exchanges in DNA over time are functionally identical to swapping passengers, we can reformulate this as a constained seating rearrangement with known starting and ending poisitions.
+Another related problem is found in kidney exchanges and other market clearinghouses where a number of patient-donor pairs that aren't compatible require trades with other patient-donor pairs for compatible organs.  Market clearinghouses work like our 1D airplanes with large families that only need to seat together in pairs.  The problem is solved by finding a cycle cover of a graph, which was proven NP complete \cite{abraham2007clearing}.  Its impact on saving lives was both simulated \cite{roth2004kidney} and implemented \cite{abraham2007clearing}.  It was also proven that at allowing only 4 pairs of patients in any exchange chain is sufficient to guarantee an optimal cycle cover \cite{roth2007efficient}.
+
+Cycle covers of graphs also find an application in genetics.  This NP complete family of problems \cite{bryant1998complexity}, \cite{durrett2005genomic}, \cite{goldberg2001complexity}, \cite{caprara1999formulations}, \cite{sankoff1997median}, \cite{popov2007multiple} seeks the series of changes in DNA that lead from the DNA sequence of a common ancestor to two (or more) descendents.  Because the mutations and exchanges in DNA over time are functionally identical to swapping passengers, we can reformulate this as a constained seating rearrangement with known starting and ending poisitions.
 
 \subsection{Airplane as a Line Simplification}
 
@@ -607,7 +608,7 @@ Win-win exchanges are 2 couples that can both be paired with a single exchange. 
 
 This generalizes to $N$ chains, where chains are characterized by $N$ pairs that can all be satisfied with exactly $N-1$ swaps.
 
-\subsection{Optimality of Sweep Algorithm}
+\subsection{Performance Ratio of Sweep Algorithm}
 
 Our sweep algorithm ensures that we leave in place as many completed couples as possible. We do this because each completed couple we leave in place requires zero swaps, while setting them to be unaligned introduces new exchanges into our solution.  The ratio of unaligned exchanges to aligned exchanges is thus infinite, something to be avoided if we want a to bound the badness of a solution.
 
